@@ -635,7 +635,11 @@ function normalizeCustomer(c){
     telefono: c.telefono || '',
     nacimiento: c.nacimiento || '',
     localHabitualId: c.local_habitual_id || c.localHabitualId || '',
-    puntos: Number(c.puntos_saldo != null ? c.puntos_saldo : (c.puntos != null ? c.puntos : 0)),
+    puntos: Number(
+      c.puntosSaldo != null ? c.puntosSaldo :
+      (c.puntos_saldo != null ? c.puntos_saldo :
+      (c.puntos != null ? c.puntos : 0))
+    ),
     totalVisitas: Number(c.total_visitas != null ? c.total_visitas : (c.totalVisitas != null ? c.totalVisitas : 0)),
     activo: c.activo || 'si',
     miembroDesde:
@@ -660,7 +664,11 @@ function normalizeReward(item){
     id: item.id || '',
     nombre: item.nombre || '',
     descripcion: item.descripcion || '',
-    puntosReq: Number(item.puntos_requeridos != null ? item.puntos_requeridos : (item.puntosReq != null ? item.puntosReq : 0)),
+    puntosReq: Number(
+      item.puntosRequeridos != null ? item.puntosRequeridos :
+      (item.puntos_requeridos != null ? item.puntos_requeridos :
+      (item.puntosReq != null ? item.puntosReq : 0))
+    ),
     activo: item.activo != null ? item.activo : 'si',
     orden: Number(item.orden != null ? item.orden : 99),
     imagenes: [item.img1, item.img2, item.img3].filter(Boolean)
@@ -1092,3 +1100,4 @@ window.addEventListener('load', async () => {
 </script>
 </body>
 </html>
+
