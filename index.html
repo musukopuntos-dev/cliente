@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Musuko Puntos V4 — Mi Cuenta</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --naranja:#e78333;
+  --naranja-dark:#bf6000;
+  --border:rgba(231,131,51,.2);
+  --glass:rgba(255,255,255,.04);
+  --glass-border:rgba(255,255,255,.08);
+  --ok:#27ae60;
+  --err:#e74c3c;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:#0d0d0d;color:#fff;font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
+button,input{font-family:'Outfit',sans-serif}
+.bg{
+  position:fixed;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse at 15% 15%, rgba(231,131,51,0.10) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 85%, rgba(231,131,51,0.06) 0%, transparent 45%),
+    #0d0d0d;
+}
+
+.app-loader{
+  position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:center;
+  background:rgba(13,13,13,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:24px;
+}
+.app-loader.visible{display:flex}
+.loader-card{
+  width:min(100%,280px);border-radius:22px;border:1px solid rgba(231,131,51,.2);
+  background:rgba(23,23,23,.95);box-shadow:0 24px 80px rgba(0,0,0,.45);padding:22px 20px;text-align:center;
+}
+.loader-logo{
+  width:54px;height:54px;object-fit:contain;display:block;margin:0 auto 12px;
+  filter:drop-shadow(0 8px 20px rgba(231,131,51,.16));animation:loaderFloat 1.7s ease-in-out infinite;
+}
+.loader-ring{
+  width:30px;height:30px;margin:0 auto 12px;border-radius:50%;
+  border:2.5px solid rgba(231,131,51,.18);border-top-color:var(--naranja);animation:spin .85s linear infinite;
+}
+.loader-title{font-size:15px;font-weight:600;margin-bottom:4px}
+.loader-text{font-size:12px;color:rgba(255,255,255,.42);line-height:1.5}
+@keyframes loaderFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.login-wrap{
+  position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:32px 20px;
+}
+.login-logo{height:48px;width:auto;opacity:.9;margin:0 auto 8px;display:block}
+.login-badge{
+  font-size:10px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--naranja);
+  display:block;margin-bottom:32px;text-align:center;
+}
+.login-card{
+  width:100%;max-width:360px;background:rgba(255,255,255,.04);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border:1px solid rgba(231,131,51,.18);border-radius:24px;padding:32px 28px;
+}
+.login-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;margin-bottom:6px}
+.login-sub{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:24px;line-height:1.6}
+.input-label{
+  font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.35);
+  margin-bottom:6px;display:block;
+}
+.rut-input{
+  width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;padding:14px 16px;color:#fff;font-size:18px;letter-spacing:2px;outline:none;
+  transition:border-color .2s, background .2s;-webkit-appearance:none;
+}
+.rut-input::placeholder{color:rgba(255,255,255,.2);letter-spacing:1px;font-size:15px}
+.rut-input:focus{border-color:var(--naranja);background:rgba(231,131,51,.06)}
+.btn-login{
+  width:100%;margin-top:16px;padding:15px;background:var(--naranja);border:none;border-radius:12px;color:#fff;
+  font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;
+}
+.btn-login:hover:not(:disabled){background:var(--naranja-dark)}
+.btn-login:disabled{opacity:.6;cursor:not-allowed}
+.login-error{
+  margin-top:12px;padding:10px 14px;background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.25);
+  border-radius:8px;font-size:12px;color:var(--err);text-align:center;display:none;
+}
+.login-error.visible{display:block}
+.login-footer-text{margin-top:20px;text-align:center;font-size:12px;color:rgba(255,255,255,.25)}
+.login-footer-text a{color:var(--naranja);text-decoration:none}
+
+.home-wrap{
+  display:none;position:relative;z-index:10;min-height:100vh;max-width:480px;margin:0 auto;padding-bottom:80px;
+}
+.topbar{display:flex;align-items:center;justify-content:center;padding:20px 20px 0;position:relative}
+.topbar-logo{height:28px;opacity:.8;display:block;margin:0 auto}
+.btn-salir{font-size:12px;color:rgba(255,255,255,.35);background:none;border:none;cursor:pointer;position:absolute;right:20px;top:20px}
+.btn-salir:hover{color:var(--naranja)}
+
+.popup-overlay{
+  display:none;position:fixed;inset:0;z-index:1200;background:rgba(0,0,0,.58);
+  backdrop-filter:blur(4px);padding:20px;align-items:center;justify-content:center;
+}
+.popup-overlay.visible{display:flex}
+.popup-banner{
+  width:min(100%,420px);background:linear-gradient(135deg, rgba(38,21,9,.98) 0%, rgba(57,31,13,.98) 100%);
+  border:1px solid rgba(231,131,51,.35);border-radius:20px;padding:22px 44px 22px 20px;font-size:15px;line-height:1.5;
+  color:rgba(255,255,255,.9);position:relative;box-shadow:0 20px 60px rgba(0,0,0,.38);display:flex;align-items:flex-start;gap:12px;
+}
+.popup-dot{width:8px;height:8px;background:var(--naranja);border-radius:50%;flex-shrink:0;margin-top:8px}
+.popup-close{
+  position:absolute;right:12px;top:12px;background:none;border:none;color:rgba(255,255,255,.35);cursor:pointer;font-size:20px;line-height:1;padding:4px;
+}
+.popup-close:hover{color:rgba(255,255,255,.7)}
+.popup-texto{padding-right:6px}
+
+.hero{
+  margin:16px 20px 0;background:linear-gradient(135deg, rgba(231,131,51,.18) 0%, rgba(231,131,51,.06) 100%);
+  border:1px solid rgba(231,131,51,.25);border-radius:20px;padding:24px 22px;position:relative;overflow:hidden;
+}
+.hero::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle, rgba(231,131,51,.15) 0%, transparent 70%);border-radius:50%}
+.hero-greeting{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:2px}
+.hero-nombre{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;margin-bottom:18px}
+.hero-pts-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+.hero-pts-num{font-family:'Cormorant Garamond',serif;font-size:56px;font-weight:300;color:var(--naranja);line-height:1}
+.hero-pts-label{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:8px}
+.hero-right{text-align:right}
+.hero-proximo-label{font-size:10px;color:rgba(255,255,255,.3);margin-bottom:2px}
+.hero-proximo-val{font-size:14px;font-weight:500;color:rgba(255,255,255,.7)}
+.hero-meta{font-size:11px;color:var(--naranja);margin-top:2px}
+
+.progress-section{margin:12px 20px 0}
+.progress-track{background:rgba(255,255,255,.08);border-radius:99px;height:6px;overflow:hidden}
+.progress-fill{background:linear-gradient(90deg,var(--naranja-dark),var(--naranja));border-radius:99px;height:6px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.progress-labels{display:flex;justify-content:space-between;gap:10px;margin-top:6px}
+.progress-label{font-size:10px;color:rgba(255,255,255,.25)}
+
+.info-pills{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 20px 0}
+.pill{background:var(--glass);border:1px solid var(--glass-border);border-radius:10px;padding:10px 12px;min-width:0}
+.pill-label{font-size:10px;color:rgba(255,255,255,.3);margin-bottom:3px}
+.pill-val{font-size:12px;font-weight:500;color:rgba(255,255,255,.8);word-break:break-word}
+
+.section{margin:20px 20px 0}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+.section-title{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.35)}
+.section-note{font-size:12px;color:rgba(255,255,255,.32)}
+
+.catalogo-list{display:flex;flex-direction:column;gap:10px}
+.premio-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:14px;overflow:hidden}
+.premio-card.disponible{border-color:rgba(231,131,51,.3);background:rgba(231,131,51,.05)}
+.premio-img-wrap{position:relative}
+.premio-imgs{display:flex;overflow:hidden}
+.premio-img{width:100%;height:160px;object-fit:cover;flex-shrink:0;display:none}
+.premio-img.active{display:block}
+.carrusel-dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:4px}
+.car-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.4);cursor:pointer;transition:background .2s}
+.car-dot.active{background:var(--naranja)}
+.premio-body{padding:14px}
+.premio-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.premio-nombre{font-size:15px;font-weight:500}
+.premio-pts-badge{font-size:11px;font-weight:600;background:rgba(231,131,51,.15);color:var(--naranja);border:1px solid rgba(231,131,51,.25);border-radius:99px;padding:3px 10px;white-space:nowrap}
+.premio-desc{font-size:12px;color:rgba(255,255,255,.4);margin-top:4px}
+.premio-progress{margin-top:10px}
+.premio-prog-track{background:rgba(255,255,255,.08);border-radius:99px;height:4px}
+.premio-prog-fill{border-radius:99px;height:4px;transition:width 1s ease}
+.premio-prog-label{display:flex;justify-content:space-between;margin-top:5px;gap:8px}
+.premio-prog-text{font-size:11px;color:rgba(255,255,255,.3)}
+.tag-disponible{display:inline-block;margin-top:8px;font-size:11px;font-weight:600;background:rgba(231,131,51,.15);color:var(--naranja);border-radius:6px;padding:3px 10px}
+
+.qr-section{margin:20px 20px 0;background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;padding:20px;text-align:center}
+.qr-title{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:16px}
+.qr-wrap{display:inline-block;background:#fff;border-radius:12px;padding:12px}
+.qr-id{margin-top:12px;font-size:16px;font-weight:600;color:var(--naranja);letter-spacing:3px}
+.qr-sub{font-size:11px;color:rgba(255,255,255,.3);margin-top:4px}
+
+.historial-toggle,.como-toggle{
+  display:flex;align-items:center;justify-content:space-between;background:var(--glass);border:1px solid var(--glass-border);
+  border-radius:12px;padding:14px 16px;cursor:pointer;width:100%;color:rgba(255,255,255,.7);font-size:13px;font-weight:500;transition:border-color .2s;
+}
+.historial-toggle:hover,.como-toggle:hover{border-color:rgba(231,131,51,.25)}
+.historial-toggle.open,.como-toggle.open{border-color:rgba(231,131,51,.3);border-radius:12px 12px 0 0}
+.hist-arrow{font-size:12px;color:var(--naranja);transition:transform .25s}
+.hist-arrow.open{transform:rotate(180deg)}
+.historial-body,.como-body{
+  max-height:0;overflow:hidden;background:rgba(255,255,255,.02);
+  border:1px solid rgba(231,131,51,.15);border-top:none;border-radius:0 0 12px 12px;
+  transition:max-height .35s cubic-bezier(.4,0,.2,1);
+}
+.historial-body.open{max-height:900px}
+.como-body.open{max-height:420px}
+.historial-inner{padding:0 16px}
+.hist-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.hist-row:last-child{border-bottom:none}
+.hist-icon{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.hist-icon.compra{background:rgba(39,174,96,.12);color:#27ae60}
+.hist-icon.canje{background:rgba(231,131,51,.12);color:var(--naranja)}
+.hist-icon.bienvenida{background:rgba(52,152,219,.12);color:#3498db}
+.hist-icon.vencimiento{background:rgba(231,76,60,.12);color:#e74c3c}
+.hist-body{flex:1;min-width:0}
+.hist-desc{font-size:13px;color:rgba(255,255,255,.8)}
+.hist-fecha{font-size:11px;color:rgba(255,255,255,.3);margin-top:2px}
+.hist-pts{font-size:13px;font-weight:500;white-space:nowrap}
+.pts-pos{color:#27ae60}
+.pts-neg{color:var(--naranja)}
+.pts-venc{color:#e74c3c}
+.hist-ver-mas{text-align:center;padding:10px 0 14px;font-size:12px;color:var(--naranja);cursor:pointer;font-weight:500}
+.hist-ver-mas:hover{opacity:.8}
+.como-wrap{margin:20px 20px 0}
+.como-inner{padding:16px;display:flex;flex-direction:column;gap:14px}
+.como-step{display:flex;gap:12px;align-items:flex-start}
+.como-num{
+  width:24px;height:24px;min-width:24px;background:rgba(231,131,51,.15);border:1px solid rgba(231,131,51,.3);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--naranja);
+}
+.como-text strong{font-size:13px;display:block;margin-bottom:2px;color:rgba(255,255,255,.8)}
+.como-text span{font-size:12px;color:rgba(255,255,255,.35);line-height:1.5}
+
+.nav-bottom{
+  position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(13,13,13,.92);backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.07);display:none;justify-content:space-around;
+  padding:10px 0 max(10px, env(safe-area-inset-bottom));
+}
+.nav-bottom.visible{display:flex}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:rgba(255,255,255,.3);cursor:pointer;padding:4px 16px;border:none;background:none}
+.nav-item.active{color:var(--naranja)}
+.nav-icon{font-size:18px}
+
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+.hidden{display:none!important}
+
+@media (max-width:420px){
+  .hero-pts-row{flex-direction:column;align-items:flex-start}
+  .hero-right{text-align:left}
+  .info-pills{grid-template-columns:1fr}
+  .progress-labels{flex-direction:column;align-items:flex-start}
+  .premio-header{flex-direction:column}
+}
+@media (min-width:480px){
+  .home-wrap{border-left:1px solid rgba(255,255,255,.04);border-right:1px solid rgba(255,255,255,.04)}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+
+<div class="app-loader" id="app-loader" aria-hidden="true">
+  <div class="loader-card">
+    <img class="loader-logo" src="https://i.postimg.cc/dV2FdDn6/Diseno-sin-titulo-3-fotor-20250814173243.png" alt="Musuko" onerror="this.style.display='none'">
+    <div class="loader-ring"></div>
+    <div class="loader-title" id="app-loader-title">Cargando tu cuenta</div>
+    <div class="loader-text" id="app-loader-text">Estamos preparando tu información.</div>
+  </div>
+</div>
+
+<div class="login-wrap" id="login-screen">
+  <img src="https://i.postimg.cc/dV2FdDn6/Diseno-sin-titulo-3-fotor-20250814173243.png" alt="Musuko" class="login-logo" onerror="this.style.display='none'">
+  <span class="login-badge">Musuko Puntos</span>
+  <div class="login-card">
+    <h1 class="login-title">Mi cuenta</h1>
+    <p class="login-sub">Ingresa tu RUT y tu fecha de nacimiento para acceder a tus puntos y beneficios.</p>
+
+    <label class="input-label">Tu RUT</label>
+    <input type="text" id="rut-login" class="rut-input" placeholder="12.345.678-9" maxlength="12" autocomplete="off"
+      oninput="formatearRutLogin(this)" onkeydown="if(event.key==='Enter') doLogin()">
+
+    <label class="input-label" style="margin-top:12px">Fecha de nacimiento</label>
+    <input type="date" id="nacimiento-login" class="rut-input" autocomplete="bday" onkeydown="if(event.key==='Enter') doLogin()">
+
+    <div class="login-error" id="login-error"></div>
+
+    <button class="btn-login" id="btn-login" onclick="doLogin()">
+      <span id="btn-login-texto">Ver mis puntos</span>
+      <div style="display:none;align-items:center;gap:8px" id="btn-login-loader">
+        <div class="spinner"></div>
+        <span id="btn-login-estado">Buscando...</span>
+      </div>
+    </button>
+
+    <p class="login-footer-text">
+      ¿No eres miembro aún? <a href="#" id="registro-link">Regístrate aquí</a>
+    </p>
+  </div>
+</div>
+
+<div class="home-wrap" id="home-screen">
+  <div class="topbar">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <img src="https://i.postimg.cc/dV2FdDn6/Diseno-sin-titulo-3-fotor-20250814173243.png" alt="Musuko" class="topbar-logo" onerror="this.style.display='none'">
+      <span class="login-badge" style="margin-bottom:0;margin-top:8px;">Musuko Puntos</span>
+    </div>
+    <button class="btn-salir" onclick="doLogout()">← Salir</button>
+  </div>
+
+  <div class="popup-overlay" id="popup-overlay">
+    <div class="popup-banner" id="popup-banner" role="dialog" aria-modal="true" aria-labelledby="popup-texto">
+      <div class="popup-dot"></div>
+      <span class="popup-texto" id="popup-texto"></span>
+      <button class="popup-close" type="button" onclick="cerrarPopup()" aria-label="Cerrar">✕</button>
+    </div>
+  </div>
+
+  <div class="hero">
+    <p class="hero-greeting">Hola de nuevo,</p>
+    <h2 class="hero-nombre" id="h-nombre">—</h2>
+    <div class="hero-pts-row">
+      <div>
+        <div class="hero-pts-num" id="h-puntos">0</div>
+        <div class="hero-pts-label">puntos disponibles</div>
+      </div>
+      <div class="hero-right">
+        <div class="hero-proximo-label">próximo premio</div>
+        <div class="hero-proximo-val" id="h-proximo">—</div>
+        <div class="hero-meta" id="h-meta"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-track">
+      <div class="progress-fill" id="h-progress" style="width:0%"></div>
+    </div>
+    <div class="progress-labels">
+      <span class="progress-label">0 pts</span>
+      <span class="progress-label" id="h-progress-label"></span>
+    </div>
+  </div>
+
+  <div class="info-pills">
+    <div class="pill">
+      <div class="pill-label">Miembro desde</div>
+      <div class="pill-val" id="h-miembro">—</div>
+    </div>
+    <div class="pill">
+      <div class="pill-label">Visitas</div>
+      <div class="pill-val" id="h-visitas">—</div>
+    </div>
+    <div class="pill">
+      <div class="pill-label">Último canje</div>
+      <div class="pill-val" id="h-ultimo-canje">—</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">Premios disponibles</span>
+      <span class="section-note" id="catalogo-note"></span>
+    </div>
+    <div class="catalogo-list" id="catalogo-list">
+      <p style="font-size:13px;color:rgba(255,255,255,.3);padding:12px 0">Cargando catálogo...</p>
+    </div>
+  </div>
+
+  <div class="qr-section" id="qr-section">
+    <div class="qr-title">Mi código QR</div>
+    <div class="qr-wrap" id="qr-container"></div>
+    <div class="qr-id" id="qr-id-texto">—</div>
+    <div class="qr-sub">Muéstralo al cajero para acumular o canjear puntos</div>
+  </div>
+
+  <div class="section">
+    <div class="historial-wrap">
+      <button class="historial-toggle" id="hist-toggle" onclick="toggleHistorial()">
+        <span>Mis últimas visitas</span>
+        <span class="hist-arrow" id="hist-arrow">▾</span>
+      </button>
+      <div class="historial-body" id="historial-body">
+        <div class="historial-inner" id="historial-list">
+          <p style="font-size:13px;color:rgba(255,255,255,.3);padding:12px 0">Sin historial aún</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="como-wrap">
+    <button class="como-toggle" id="como-toggle" onclick="toggleComo()">
+      <span>Cómo funciona Musuko Puntos</span>
+      <span class="hist-arrow" id="como-arrow">▾</span>
+    </button>
+    <div class="como-body" id="como-body">
+      <div class="como-inner">
+        <div class="como-step">
+          <div class="como-num">1</div>
+          <div class="como-text">
+            <strong>Visita cualquier local</strong>
+            <span>Indica al cajero que eres miembro Musuko Puntos y muestra tu QR o da tu RUT.</span>
+          </div>
+        </div>
+        <div class="como-step">
+          <div class="como-num">2</div>
+          <div class="como-text">
+            <strong>Acumula puntos</strong>
+            <span id="como-acumula">Acumula puntos con cada compra válida registrada en caja.</span>
+          </div>
+        </div>
+        <div class="como-step">
+          <div class="como-num">3</div>
+          <div class="como-text">
+            <strong>Canjea premios</strong>
+            <span>Al llegar a la meta, pide tu premio al cajero. El canje es 100% con puntos.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:20px"></div>
+</div>
+
+<div class="nav-bottom" id="nav-bottom">
+  <button class="nav-item active" onclick="goTop()"><span class="nav-icon">★</span>Puntos</button>
+  <button class="nav-item" onclick="scrollToSection('catalogo-list')"><span class="nav-icon">◎</span>Premios</button>
+  <button class="nav-item" onclick="scrollToSection('qr-section')"><span class="nav-icon">▣</span>QR</button>
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyO9ihZqACT13g8Sk999Ba-uv4elZMYJNtX2woCHlSD_yOddgS1qSVugJ-RqMaMDAY/exec';
+const SESSION_KEY = 'musuko_v4_cliente';
+const POPUP_CACHE_KEY = 'musuko_v4_cliente_popup_cache';
+const DEFAULT_LOGO = 'https://i.postimg.cc/dV2FdDn6/Diseno-sin-titulo-3-fotor-20250814173243.png';
+const DEFAULT_REGISTRO_URL = 'registro_musuko_puntos_V4_FINAL_REGISTRO.html';
+const APP_VERSION = 'v4-client-rc1';
+
+let customerData = null;
+let catalogData = [];
+let historyData = [];
+let historyVisible = 3;
+let popupVisibleMessage = '';
+let popupClosedMessage = '';
+let configCache = {};
+let loginInProgress = false;
+
+function showAppLoader(title, text){
+  const overlay = document.getElementById('app-loader');
+  document.getElementById('app-loader-title').textContent = title || 'Cargando';
+  document.getElementById('app-loader-text').textContent = text || 'Espera un momento.';
+  overlay.classList.add('visible');
+}
+function hideAppLoader(){ document.getElementById('app-loader').classList.remove('visible'); }
+
+function fetchWithTimeout(url, options = {}, timeout = 15000){
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
+  return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
+}
+
+async function api(action, payload = {}, method = 'POST'){
+  const req = { action, ...payload };
+  const res = await fetchWithTimeout(SCRIPT_URL, {
+    method,
+    body: JSON.stringify(req)
+  }, action === 'v4.auth.customer.login' ? 22000 : 18000);
+  return parseApiResponse(res);
+}
+
+async function parseApiResponse(res){
+  const raw = await res.text();
+  let json;
+  try { json = JSON.parse(raw); }
+  catch(e){ throw new Error('Respuesta no válida del servidor'); }
+
+  if (!res.ok) {
+    const msg = json && json.error && json.error.message ? json.error.message : 'Error de conexión';
+    throw new Error(msg);
+  }
+  if (json && json.ok === false) {
+    const msg = json.error && json.error.message ? json.error.message : 'La operación no pudo completarse';
+    throw new Error(msg);
+  }
+  return json;
+}
+
+function dataOf(response){
+  return response && typeof response === 'object' ? (response.data || response) : {};
+}
+
+function normalizeDateForApi(value){
+  if (!value) return '';
+  const clean = String(value).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) return clean;
+  const parsed = parseFechaLocal(clean);
+  if (!parsed) return '';
+  const y = parsed.getFullYear();
+  const m = String(parsed.getMonth() + 1).padStart(2, '0');
+  const d = String(parsed.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function parseFechaLocal(v){
+  if (!v) return null;
+  if (v instanceof Date && !isNaN(v.getTime())) return v;
+  const txt = String(v).trim();
+  if (!txt) return null;
+
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(txt)) {
+    const [d,m,y] = txt.split('/').map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  const iso = txt.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2}))?)?/);
+  if (iso) {
+    const year = Number(iso[1]);
+    const month = Number(iso[2]) - 1;
+    const day = Number(iso[3]);
+    const hour = Number(iso[4] || 0);
+    const minute = Number(iso[5] || 0);
+    const second = Number(iso[6] || 0);
+    return new Date(year, month, day, hour, minute, second);
+  }
+
+  const d = new Date(txt);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function fmtFecha(v){
+  const fecha = parseFechaLocal(v);
+  if (!fecha) return v || '—';
+  return fecha.toLocaleDateString('es-CL', { day:'numeric', month:'long', year:'numeric' });
+}
+function fmtHora(v){
+  if (!v) return '';
+  const txt = String(v).trim();
+  if (!txt) return '';
+  if (/^\d{1,2}:\d{2}$/.test(txt)) return txt;
+  const fecha = parseFechaLocal(txt);
+  if (!fecha) return txt;
+  return fecha.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit', hour12:false });
+}
+function fmtFechaHora(fecha, hora){
+  const f = fmtFecha(fecha);
+  const h = fmtHora(hora || fecha);
+  return h && h !== fecha ? `${f} · ${h}` : f;
+}
+
+function formatearRutLogin(input){
+  let val = input.value.replace(/[^0-9kK]/g, '').toUpperCase();
+  if (!val.length) { input.value = ''; return; }
+  const dv = val.slice(-1);
+  let cuerpo = val.slice(0, -1);
+  if (!cuerpo.length) { input.value = dv; return; }
+  let fmt = '', c = 0;
+  for (let i = cuerpo.length - 1; i >= 0; i--) {
+    if (c > 0 && c % 3 === 0) fmt = '.' + fmt;
+    fmt = cuerpo[i] + fmt; c++;
+  }
+  input.value = fmt + '-' + dv;
+}
+function normalizeRutLoose(v){
+  return String(v || '').replace(/\./g,'').replace(/\s+/g,'').toUpperCase();
+}
+
+function getSession(){
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+function saveSession(session){
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify(session)); } catch (e) {}
+}
+function clearSession(){
+  try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+}
+function getPopupCache(){
+  try {
+    const raw = localStorage.getItem(POPUP_CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+function savePopupCache(data){
+  try { localStorage.setItem(POPUP_CACHE_KEY, JSON.stringify(data)); } catch (e) {}
+}
+function clearPopupCache(){
+  try { localStorage.removeItem(POPUP_CACHE_KEY); } catch (e) {}
+}
+
+function isSessionUsable(session){
+  return !!(session && session.authToken && Number(session.sessionExpiresAt || 0) > Date.now());
+}
+
+function setRegisterLink(url){
+  const el = document.getElementById('registro-link');
+  el.href = url || DEFAULT_REGISTRO_URL;
+}
+function mergeConfig(newConfig){
+  if (newConfig && typeof newConfig === 'object') {
+    configCache = { ...configCache, ...newConfig };
+  }
+  const registerUrl = configCache.url_panel_registro || configCache.urlPanelRegistro || DEFAULT_REGISTRO_URL;
+  setRegisterLink(registerUrl);
+  const tasa = configCache.tasa_puntos || configCache.tasaPuntos;
+  if (tasa) {
+    document.getElementById('como-acumula').textContent = `Acumula 1 punto por cada $${Number(tasa).toLocaleString('es-CL')} CLP gastados. El cajero registra tu compra y el sistema actualiza tu saldo automáticamente.`;
+  }
+}
+
+function syncPopupFromConfig(){
+  const mensaje = configCache.popup_mensaje || configCache.popupMensaje || '';
+  const activoRaw = String(configCache.popup_activo || configCache.popupActivo || '').toLowerCase();
+  const activo = (activoRaw === 'si' || activoRaw === 'sí' || activoRaw === 'true') && !!mensaje;
+  if (activo) {
+    savePopupCache({ activo: true, mensaje });
+    mostrarPopup(mensaje);
+  } else {
+    clearPopupCache();
+    cerrarPopup();
+  }
+}
+
+function extractConfigPublic(source){
+  if (!source || typeof source !== 'object') return {};
+  return source.configPublica || source.config || source.publicConfig || {};
+}
+
+function extractCustomerPayload(source){
+  const customer = source.customer || source.cliente || source.customerResumen || source.resumenCuenta || {};
+  const bootstrap = source.bootstrap || {};
+  const hist = source.historialReciente || source.historial || bootstrap.historialReciente || bootstrap.historial || [];
+  const catalog = source.catalogo || bootstrap.catalogo || bootstrap.rewards || [];
+  const publicCfg = extractConfigPublic(source);
+  const authToken = source.authToken || '';
+  const sessionExpiresAt = source.sessionExpiresAt || 0;
+  return { customer, hist, catalog, publicCfg, authToken, sessionExpiresAt };
+}
+
+function normalizeCustomer(c){
+  if (!c || typeof c !== 'object') return null;
+  return {
+    id: c.id || c.customerId || '',
+    rut: c.rut || '',
+    nombre: c.nombres || c.nombre || '',
+    apellido: c.apellidos || c.apellido || '',
+    correo: c.correo || '',
+    telefono: c.telefono || '',
+    nacimiento: c.nacimiento || '',
+    localHabitualId: c.local_habitual_id || c.localHabitualId || '',
+    puntos: Number(c.puntos_saldo != null ? c.puntos_saldo : (c.puntos != null ? c.puntos : 0)),
+    totalVisitas: Number(c.total_visitas != null ? c.total_visitas : (c.totalVisitas != null ? c.totalVisitas : 0)),
+    activo: c.activo || 'si',
+    miembroDesde:
+      c.fecha_registro ||
+      c.fechaRegistro ||
+      c.miembroDesde ||
+      c.memberSince ||
+      c.created_at ||
+      c.createdAt ||
+      c.fecha_alta ||
+      c.fechaAlta ||
+      '',
+    ultimoCanje: c.ultimo_canje_at || c.ultimoCanje || c.ultimoCanjeAt || '',
+    ultimaAcumulacion: c.ultima_acumulacion_at || c.ultimaAcumulacion || c.ultimaAcumulacionAt || '',
+    raw: c
+  };
+}
+
+function normalizeReward(item){
+  if (!item || typeof item !== 'object') return null;
+  return {
+    id: item.id || '',
+    nombre: item.nombre || '',
+    descripcion: item.descripcion || '',
+    puntosReq: Number(item.puntos_requeridos != null ? item.puntos_requeridos : (item.puntosReq != null ? item.puntosReq : 0)),
+    activo: item.activo != null ? item.activo : 'si',
+    orden: Number(item.orden != null ? item.orden : 99),
+    imagenes: [item.img1, item.img2, item.img3].filter(Boolean)
+  };
+}
+
+function normalizeHistory(items){
+  return (Array.isArray(items) ? items : []).map(item => ({
+    tipo: (item.tipo || '').toLowerCase(),
+    puntos: Number(item.puntos || 0),
+    fecha: item.created_at || item.fecha || '',
+    hora: item.hora || '',
+    local: item.local_nombre || item.local || '',
+    premio: item.premio_nombre || item.premio || '',
+    descripcion: item.descripcion || ''
+  }));
+}
+
+function buildSessionPayload(source, extras = {}){
+  const ext = extractCustomerPayload(source);
+  const normalizedCustomer = normalizeCustomer(ext.customer || extras.customer);
+  const normalizedCatalog = (ext.catalog || extras.catalog || []).map(normalizeReward).filter(Boolean);
+  const normalizedHistory = normalizeHistory(ext.hist || extras.history || []);
+  return {
+    version: APP_VERSION,
+    authToken: ext.authToken || extras.authToken || '',
+    sessionExpiresAt: Number(ext.sessionExpiresAt || extras.sessionExpiresAt || 0),
+    auth: extras.auth || null,
+    customer: normalizedCustomer,
+    catalog: normalizedCatalog,
+    history: normalizedHistory,
+    config: { ...configCache, ...(ext.publicCfg || extras.config || {}) }
+  };
+}
+
+async function loadInitialPublicConfig(){
+  try {
+    const res = await api('v4.public.bootstrap', {});
+    const data = dataOf(res);
+    mergeConfig(extractConfigPublic(data));
+    syncPopupFromConfig();
+  } catch (e) {
+    setRegisterLink(DEFAULT_REGISTRO_URL);
+    const popup = getPopupCache();
+    if (popup && popup.activo && popup.mensaje) mostrarPopup(popup.mensaje);
+  }
+}
+
+function resetBtn(btn, textEl, loaderEl){
+  btn.disabled = false;
+  textEl.style.display = '';
+  loaderEl.style.display = 'none';
+}
+
+async function doLogin(){
+  if (loginInProgress) return;
+
+  const rutRaw = document.getElementById('rut-login').value.trim();
+  const nacimientoRaw = document.getElementById('nacimiento-login').value;
+  const nacimiento = normalizeDateForApi(nacimientoRaw);
+  const errEl = document.getElementById('login-error');
+  const btn = document.getElementById('btn-login');
+  const textEl = document.getElementById('btn-login-texto');
+  const loaderEl = document.getElementById('btn-login-loader');
+  const stateEl = document.getElementById('btn-login-estado');
+
+  errEl.classList.remove('visible');
+  errEl.textContent = '';
+
+  if (normalizeRutLoose(rutRaw).length < 8) {
+    errEl.textContent = 'Ingresa tu RUT completo';
+    errEl.classList.add('visible');
+    return;
+  }
+  if (!nacimiento) {
+    errEl.textContent = 'Ingresa tu fecha de nacimiento';
+    errEl.classList.add('visible');
+    return;
+  }
+
+  loginInProgress = true;
+  btn.disabled = true;
+  textEl.style.display = 'none';
+  loaderEl.style.display = 'flex';
+  showAppLoader('Ingresando a tu cuenta', 'Estamos validando tu información.');
+
+  const msgs = ['Buscando cuenta...', 'Validando datos...', 'Cargando beneficios...'];
+  let idx = 0;
+  const iv = setInterval(() => { stateEl.textContent = msgs[idx++ % msgs.length]; }, 850);
+
+  try {
+    const res = await api('v4.auth.customer.login', {
+      rut: normalizeRutLoose(rutRaw),
+      nacimiento
+    });
+    clearInterval(iv);
+    const data = dataOf(res);
+    const session = buildSessionPayload(data, {
+      auth: { rut: normalizeRutLoose(rutRaw), nacimiento }
+    });
+
+    if (!session.customer) throw new Error('No se pudo cargar tu cuenta');
+    mergeConfig(session.config || {});
+    saveSession(session);
+    showHome(session.customer, session.catalog || [], session.history || []);
+  } catch (err) {
+    clearInterval(iv);
+    errEl.textContent = err.message || 'Error de conexión. Intenta nuevamente.';
+    errEl.classList.add('visible');
+    hideAppLoader();
+  } finally {
+    loginInProgress = false;
+    resetBtn(btn, textEl, loaderEl);
+  }
+}
+
+async function refreshCustomerData(session, silent = false){
+  if (!session || !session.authToken) return;
+  if (!silent) showAppLoader('Actualizando tu cuenta', 'Estamos sincronizando tus puntos y beneficios.');
+
+  try {
+    const res = await api('v4.customer.bootstrap', { authToken: session.authToken });
+    const data = dataOf(res);
+    const updated = buildSessionPayload(data, {
+      auth: session.auth || null,
+      authToken: session.authToken,
+      sessionExpiresAt: data.sessionExpiresAt || session.sessionExpiresAt || 0,
+      config: session.config || {}
+    });
+    if (updated.customer) {
+      mergeConfig(updated.config || {});
+      saveSession(updated);
+      showHome(updated.customer, updated.catalog || [], updated.history || []);
+    }
+  } catch (e) {
+    if (!silent) {
+      clearSession();
+      showLoginWithError('Tu sesión expiró. Vuelve a ingresar.');
+    }
+  } finally {
+    hideAppLoader();
+  }
+}
+
+function showLoginWithError(message){
+  document.getElementById('home-screen').style.display = 'none';
+  document.getElementById('nav-bottom').classList.remove('visible');
+  document.getElementById('login-screen').style.display = 'flex';
+  const err = document.getElementById('login-error');
+  err.textContent = message || 'Debes volver a ingresar.';
+  err.classList.add('visible');
+  hideAppLoader();
+}
+
+function showHome(customer, catalog, history){
+  customerData = customer;
+  if (Array.isArray(catalog) && catalog.length) catalogData = catalog;
+  if (Array.isArray(history)) historyData = history;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('home-screen').style.display = 'block';
+  document.getElementById('nav-bottom').classList.add('visible');
+  renderCustomer(customer);
+  renderCatalog(catalogData, Number(customer.puntos || 0));
+  renderHistory(historyData);
+  renderQR(customer.id || customer.rut || '');
+  syncPopupFromConfig();
+  hideAppLoader();
+}
+
+function renderCustomer(c){
+  if (!c) return;
+  const fullName = [c.nombre || '', c.apellido || ''].join(' ').trim() || 'Miembro Musuko';
+  const points = Number(c.puntos || 0);
+  document.getElementById('h-nombre').textContent = fullName;
+  document.getElementById('h-puntos').textContent = points.toLocaleString('es-CL');
+  document.getElementById('h-miembro').textContent = fmtFecha(c.miembroDesde);
+  document.getElementById('h-visitas').textContent = String(c.totalVisitas || 0);
+  document.getElementById('h-ultimo-canje').textContent = c.ultimoCanje ? fmtFecha(c.ultimoCanje) : 'Sin canjes';
+}
+
+function renderCatalog(catalog, points){
+  const container = document.getElementById('catalogo-list');
+  const note = document.getElementById('catalogo-note');
+
+  if (!Array.isArray(catalog) || catalog.length === 0) {
+    note.textContent = '';
+    container.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,.3);padding:12px 0">Sin premios disponibles por ahora</p>';
+    document.getElementById('h-progress').style.width = '0%';
+    document.getElementById('h-progress-label').textContent = 'Aún no hay premios activos';
+    document.getElementById('h-proximo').textContent = '—';
+    document.getElementById('h-meta').textContent = '';
+    return;
+  }
+
+  const activos = [...catalog].filter(p => String(p.activo || 'si').toLowerCase() !== 'no');
+  const ordered = (activos.length ? activos : catalog).sort((a,b) => Number(a.puntosReq || 0) - Number(b.puntosReq || 0));
+  const nextReward = ordered.find(p => Number(p.puntosReq || 0) > points) || ordered[0] || null;
+
+  if (nextReward) {
+    const req = Math.max(1, Number(nextReward.puntosReq || 0));
+    const pct = Math.min(100, Math.round((points / req) * 100));
+    document.getElementById('h-progress').style.width = `${pct}%`;
+    document.getElementById('h-progress-label').textContent = `${nextReward.nombre} · ${req.toLocaleString('es-CL')} pts`;
+    document.getElementById('h-proximo').textContent = nextReward.nombre || '—';
+    document.getElementById('h-meta').textContent = points >= req ? '¡Ya puedes solicitarlo!' : `Te faltan ${(req - points).toLocaleString('es-CL')} pts`;
+  }
+
+  const available = ordered.filter(p => points >= Number(p.puntosReq || 0)).length;
+  note.textContent = available > 0 ? `${available} disponible${available > 1 ? 's' : ''}` : '';
+
+  container.innerHTML = ordered.map((p, idx) => {
+    const req = Number(p.puntosReq || 0);
+    const availableReward = points >= req;
+    const pct = req > 0 ? Math.min(100, Math.round((points / req) * 100)) : 100;
+    const fillColor = availableReward ? 'var(--naranja)' : 'rgba(255,255,255,.15)';
+    const images = Array.isArray(p.imagenes) ? p.imagenes.filter(Boolean) : [];
+
+    const imagesHtml = images.length > 0
+      ? `<div class="premio-img-wrap">
+           <div class="premio-imgs" id="imgs-${idx}">
+             ${images.map((img, i) => `<img src="${img}" class="premio-img ${i === 0 ? 'active' : ''}" alt="${escapeHtml(p.nombre || 'Premio')}" onerror="this.remove(); updateCarousel(${idx})">`).join('')}
+           </div>
+           ${images.length > 1 ? `<div class="carrusel-dots" id="dots-${idx}">${images.map((_, i) => `<div class="car-dot ${i === 0 ? 'active' : ''}" onclick="changeImg(${idx},${i})"></div>`).join('')}</div>` : ''}
+         </div>` : '';
+
+    return `<div class="premio-card ${availableReward ? 'disponible' : ''}">
+      ${imagesHtml}
+      <div class="premio-body">
+        <div class="premio-header">
+          <span class="premio-nombre">${escapeHtml(p.nombre || 'Premio')}</span>
+          <span class="premio-pts-badge">${req.toLocaleString('es-CL')} pts</span>
+        </div>
+        <p class="premio-desc">${escapeHtml(p.descripcion || '')}</p>
+        <div class="premio-progress">
+          <div class="premio-prog-track"><div class="premio-prog-fill" style="width:${pct}%;background:${fillColor}"></div></div>
+          <div class="premio-prog-label">
+            <span class="premio-prog-text">${points.toLocaleString('es-CL')}/${req.toLocaleString('es-CL')} pts</span>
+            <span class="premio-prog-text">${pct}%</span>
+          </div>
+        </div>
+        ${availableReward ? '<span class="tag-disponible">¡Disponible para canjear!</span>' : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateCarousel(idx){
+  const wrap = document.getElementById(`imgs-${idx}`);
+  if (!wrap) return;
+  const imgs = [...wrap.querySelectorAll('.premio-img')];
+  if (!imgs.length) {
+    const box = wrap.closest('.premio-img-wrap');
+    if (box) box.style.display = 'none';
+    return;
+  }
+  imgs.forEach((img, i) => img.classList.toggle('active', i === 0));
+  const dots = document.getElementById(`dots-${idx}`);
+  if (dots) {
+    const dotList = [...dots.querySelectorAll('.car-dot')];
+    dotList.forEach((dot, i) => dot.classList.toggle('active', i === 0));
+    if (imgs.length <= 1) dots.style.display = 'none';
+  }
+}
+function changeImg(idx, imgIdx){
+  const wrap = document.getElementById(`imgs-${idx}`);
+  const dots = document.getElementById(`dots-${idx}`);
+  if (wrap) wrap.querySelectorAll('.premio-img').forEach((img, i) => img.classList.toggle('active', i === imgIdx));
+  if (dots) dots.querySelectorAll('.car-dot').forEach((dot, i) => dot.classList.toggle('active', i === imgIdx));
+}
+
+function renderHistory(history){
+  historyData = normalizeHistory(history);
+  historyVisible = 3;
+  renderHistoryItems();
+}
+function renderHistoryItems(){
+  const container = document.getElementById('historial-list');
+  const total = historyData.length;
+  if (total === 0) {
+    container.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,.3);padding:12px 0">Sin historial aún</p>';
+    return;
+  }
+
+  const icons = { compra:'↑', canje:'◎', bienvenida:'★', vencimiento:'!' };
+  const slice = historyData.slice(0, historyVisible);
+
+  const rows = slice.map(h => {
+    const points = Number(h.puntos || 0);
+    const isPos = points > 0;
+    const type = String(h.tipo || 'compra').toLowerCase();
+    const ptsClass = type === 'vencimiento' ? 'pts-venc' : (isPos ? 'pts-pos' : 'pts-neg');
+    const ptsText = `${isPos ? '+' : ''}${points.toLocaleString('es-CL')}`;
+    const desc = h.descripcion || (type === 'compra' ? `Visita · ${h.local || ''}` :
+      type === 'canje' ? `Canje · ${h.premio || h.local || ''}` :
+      type === 'bienvenida' ? 'Bienvenida al club' :
+      type === 'vencimiento' ? 'Puntos vencidos' : type);
+
+    return `<div class="hist-row">
+      <div class="hist-icon ${type}">${icons[type] || '·'}</div>
+      <div class="hist-body">
+        <div class="hist-desc">${escapeHtml(desc)}</div>
+        <div class="hist-fecha">${escapeHtml(fmtFechaHora(h.fecha, h.hora))}</div>
+      </div>
+      <div class="hist-pts ${ptsClass}">${ptsText} pts</div>
+    </div>`;
+  }).join('');
+
+  const more = historyVisible < total
+    ? `<div class="hist-ver-mas" onclick="loadMoreHistory()">Ver más (${total - historyVisible} restantes) ▾</div>`
+    : total > 3 ? `<div class="hist-ver-mas" onclick="collapseHistory()">Ver menos ▴</div>` : '';
+
+  container.innerHTML = rows + more;
+}
+function loadMoreHistory(){
+  historyVisible = Math.min(historyVisible + 3, historyData.length);
+  renderHistoryItems();
+}
+function collapseHistory(){
+  historyVisible = 3;
+  renderHistoryItems();
+}
+function toggleHistorial(){
+  const body = document.getElementById('historial-body');
+  const toggle = document.getElementById('hist-toggle');
+  const arrow = document.getElementById('hist-arrow');
+  const open = body.classList.toggle('open');
+  toggle.classList.toggle('open', open);
+  arrow.classList.toggle('open', open);
+}
+function toggleComo(){
+  const body = document.getElementById('como-body');
+  const toggle = document.getElementById('como-toggle');
+  const arrow = document.getElementById('como-arrow');
+  const open = body.classList.toggle('open');
+  toggle.classList.toggle('open', open);
+  arrow.classList.toggle('open', open);
+}
+
+function renderQR(id){
+  const container = document.getElementById('qr-container');
+  container.innerHTML = '';
+  try {
+    new QRCode(container, { text: String(id || ''), width:160, height:160, colorDark:'#0d0d0d', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.M });
+  } catch(e) {
+    container.textContent = id || '—';
+  }
+  document.getElementById('qr-id-texto').textContent = id || '—';
+}
+
+function mostrarPopup(message){
+  if (!message) return;
+  const overlay = document.getElementById('popup-overlay');
+  const text = document.getElementById('popup-texto');
+  if (popupClosedMessage === message) return;
+  if (overlay.classList.contains('visible') && text.textContent === message) return;
+  popupVisibleMessage = message;
+  text.textContent = message;
+  overlay.classList.add('visible');
+}
+function cerrarPopup(){
+  const overlay = document.getElementById('popup-overlay');
+  if (popupVisibleMessage) popupClosedMessage = popupVisibleMessage;
+  overlay.classList.remove('visible');
+}
+
+async function doLogout(){
+  const session = getSession();
+  clearSession();
+  clearPopupCache();
+  try {
+    if (session && session.authToken) {
+      await api('v4.auth.logout', { authToken: session.authToken });
+    }
+  } catch (e) {}
+  customerData = null;
+  catalogData = [];
+  historyData = [];
+  hideAppLoader();
+  document.getElementById('home-screen').style.display = 'none';
+  document.getElementById('nav-bottom').classList.remove('visible');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('rut-login').value = '';
+  document.getElementById('nacimiento-login').value = '';
+  document.getElementById('login-error').classList.remove('visible');
+  document.getElementById('btn-login').disabled = false;
+  document.getElementById('btn-login-texto').style.display = '';
+  document.getElementById('btn-login-loader').style.display = 'none';
+  cerrarPopup();
+  document.getElementById('historial-body').classList.remove('open');
+  document.getElementById('hist-toggle').classList.remove('open');
+  document.getElementById('hist-arrow').classList.remove('open');
+  document.getElementById('como-body').classList.remove('open');
+  document.getElementById('como-toggle').classList.remove('open');
+  document.getElementById('como-arrow').classList.remove('open');
+}
+
+function goTop(){ window.scrollTo({ top:0, behavior:'smooth' }); }
+function scrollToSection(id){
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+function escapeHtml(value){
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+window.addEventListener('load', async () => {
+  showAppLoader('Preparando acceso', 'Cargando configuración de Musuko Puntos.');
+  await loadInitialPublicConfig();
+  const session = getSession();
+
+  if (session && isSessionUsable(session)) {
+    mergeConfig(session.config || {});
+    if (session.customer) {
+      customerData = session.customer;
+      catalogData = Array.isArray(session.catalog) ? session.catalog : [];
+      historyData = Array.isArray(session.history) ? session.history : [];
+      showHome(session.customer, catalogData, historyData);
+    }
+    await refreshCustomerData(session, true);
+  } else {
+    hideAppLoader();
+  }
+});
+</script>
+</body>
+</html>
